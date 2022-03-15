@@ -1,0 +1,39 @@
+services:
+  postgresql:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_DB: $POSTGRES_DB
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+    ports:
+      - 127.0.0.1:5432:5432
+  pgadmin:
+    image: dpage/pgadmin4:6
+    environment:
+      PGADMIN_DEFAULT_EMAIL: dummy@dum.my
+      PGADMIN_DEFAULT_PASSWORD: dummy
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+      PGADMIN_SERVER_JSON_FILE: /tmp/servers.json
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+
+    entrypoint: >
+      /bin/sh -c "
+      /bin/echo 'postgresql:5432:*:$POSTGRES_USER:$POSTGRES_PASSWORD' > /tmp/pgpass;
+      chmod 600 /tmp/pgpass;
+      /bin/sed 's/dummy_username/$POSTGRES_USER/g' /servers.json > /tmp/servers.json;
+      /entrypoint.sh
+      "
+    ports:
+      - 127.0.0.1:8080:80
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ${PWD}/servers.json:/servers.json
+    depends_on:
+      - postgresql
+volumes:
+  postgresql_data:
+  pgadmin_data:
