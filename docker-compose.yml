@@ -31,7 +31,7 @@ services:
       - 127.0.0.1:8080:80
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-      - ${PWD}/servers.json:/servers.json
+      - ./servers.json:/servers.json
     depends_on:
       - postgresql
 volumes:
